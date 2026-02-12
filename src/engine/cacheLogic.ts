@@ -1,12 +1,16 @@
 import type { CacheState, CacheType, SimulationResult, CacheEntry } from './types';
 
-const CONFIG = {
+const DEFAULT_CONFIG = {
     DIRECT_MAPPED: { sets: 8, ways: 1 },
     TWO_WAY: { sets: 4, ways: 2 }
 };
 
-export const initializeCache = (type: CacheType): CacheState => {
-    const { sets, ways } = CONFIG[type];
+export const initializeCache = (type: CacheType, numIndexes?: number): CacheState => {
+    const defaultConfig = DEFAULT_CONFIG[type];
+    // If numIndexes is provided, use it. Otherwise use default.
+    const sets = numIndexes ?? defaultConfig.sets;
+    const ways = defaultConfig.ways;
+
     return {
         type,
         sets: Array.from({ length: sets }, (_, i) => ({
@@ -25,26 +29,27 @@ export const processAddress = (
     address: number,
     timestamp: number
 ): { newState: CacheState; result: SimulationResult } => {
-    const { sets } = CONFIG[state.type];
+    const sets = state.sets.length;
     const setIndex = address % sets;
+    const tag = Math.floor(address / sets);
 
     // Clone state to avoid mutation
     const newState = structuredClone(state);
     const targetSet = newState.sets[setIndex];
 
     // Check for Hit
-    const hitIndex = targetSet.slots.findIndex(slot => slot && slot.address === address);
+    const hitIndex = targetSet.slots.findIndex(slot => slot && slot.tag === tag);
 
     if (hitIndex !== -1) {
         // HIT
         newState.hits++;
         // Update LRU
         targetSet.slots[hitIndex]!.lastUsed = timestamp;
-        newState.history.push(`HIT: Address ${address} in Set ${setIndex}`);
+        newState.history.push(`HIT: Address ${address} (Tag ${tag}) matches Set ${setIndex} slot`);
 
         return {
             newState,
-            result: { address, hit: true, setIndex }
+            result: { address, tag, hit: true, setIndex }
         };
     }
 
@@ -57,8 +62,8 @@ export const processAddress = (
 
     if (emptySlotIndex !== -1) {
         // Fill empty slot
-        targetSet.slots[emptySlotIndex] = { address, lastUsed: timestamp };
-        newState.history.push(`MISS: Placed Address ${address} in Set ${setIndex}`);
+        targetSet.slots[emptySlotIndex] = { address, tag, lastUsed: timestamp };
+        newState.history.push(`MISS: Address ${address} (Tag ${tag}) -> Set ${setIndex} (Empty Slot)`);
     } else {
         // Eviction needed (LRU)
         // Find slot with smallest lastUsed
@@ -75,12 +80,12 @@ export const processAddress = (
         evicted = targetSet.slots[lruIndex];
         // Eviction happened
         newState.evictions++;
-        targetSet.slots[lruIndex] = { address, lastUsed: timestamp };
-        newState.history.push(`MISS: Evicted Address ${evicted!.address} from Set ${setIndex} for Address ${address}`);
+        targetSet.slots[lruIndex] = { address, tag, lastUsed: timestamp };
+        newState.history.push(`MISS: Evicted Address ${evicted!.address} (Tag ${evicted!.tag}) from Set ${setIndex} for Address ${address} (Tag ${tag})`);
     }
 
     return {
         newState,
-        result: { address, hit: false, setIndex, evicted }
+        result: { address, tag, hit: false, setIndex, evicted }
     };
 };

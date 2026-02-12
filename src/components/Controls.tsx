@@ -27,7 +27,7 @@ export const Controls = ({
     };
 
     return (
-        <div className="bg-gray-800 p-3 rounded-lg border border-gray-700 shadow-md flex flex-col gap-2 w-full max-w-xl">
+        <div className="bg-gray-800 p-3 rounded-lg border border-gray-700 shadow-md flex flex-col gap-2 w-full">
             <div className="flex flex-wrap items-center gap-2 justify-between">
                 {/* Type Switcher */}
                 <div className="flex bg-gray-900 rounded p-0.5">

@@ -2,6 +2,7 @@ export type CacheType = 'DIRECT_MAPPED' | 'TWO_WAY';
 
 export interface CacheEntry {
     address: number;
+    tag: number;
     lastUsed: number; // Helper for LRU
 }
 
@@ -12,6 +13,7 @@ export interface CacheSet {
 
 export interface SimulationResult {
     address: number;
+    tag: number;
     hit: boolean;
     setIndex: number;
     evicted?: CacheEntry | null; // The entry that was evicted, if any

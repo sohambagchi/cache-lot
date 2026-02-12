@@ -3,11 +3,13 @@ import { ParkingLot } from './components/ParkingLot';
 import { Controls } from './components/Controls';
 import { Stats } from './components/Stats';
 import { Jumbotron } from './components/Jumbotron';
+import { AddressBreakdown } from './components/AddressBreakdown';
+import { BottomBar } from './components/BottomBar';
 
 function App() {
   const {
-    cacheState, lastResult, queue, isPlaying,
-    processNext, addToQueue, reset, setType, setIsPlaying
+    cacheState, lastResult, queue, isPlaying, numIndexes,
+    processNext, addToQueue, reset, setType, setIsPlaying, setNumIndexes
   } = useCacheSimulator();
 
   // Presets
@@ -40,15 +42,21 @@ function App() {
       </div>
 
       {/* Main Grid */}
-      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch flex-1 overflow-hidden pb-2">
-        {/* Left Col: Visuals */}
-        <div className="flex flex-col gap-2 items-center w-full justify-start h-full">
-          <Jumbotron result={lastResult} cacheType={cacheState.type} />
+      <div className="w-[80%] max-w-none grid grid-cols-1 lg:grid-cols-4 gap-4 items-stretch flex-1 overflow-hidden pb-2">
+
+        {/* Left Col: Calculation Info */}
+        <div className="hidden lg:flex flex-col gap-2 w-full h-full col-span-1">
+          <AddressBreakdown lastResult={lastResult} numSets={numIndexes} />
+        </div>
+
+        {/* Middle Col: Visuals */}
+        <div className="flex flex-col gap-2 items-center w-full justify-start h-full col-span-1 lg:col-span-2">
+          <Jumbotron result={lastResult} numSets={numIndexes} />
           <ParkingLot state={cacheState} lastResult={lastResult} />
         </div>
 
         {/* Right Col: Controls & Stats */}
-        <div className="flex flex-col gap-2 w-full h-full">
+        <div className="flex flex-col gap-2 w-full h-full col-span-1">
           <Stats hits={cacheState.hits} misses={cacheState.misses} evictions={cacheState.evictions} />
 
           <Controls
@@ -96,7 +104,7 @@ function App() {
           </div>
 
           {/* History Log - Expands to fill remaining space */}
-          <div className="bg-gray-800 p-3 rounded-lg border border-gray-700 flex-1 overflow-hidden flex flex-col min-h-0 mb-12">
+          <div className="bg-gray-800 p-3 rounded-lg border border-gray-700 flex-1 overflow-hidden flex flex-col min-h-0">
             <h3 className="text-gray-500 font-mono text-[16px] mb-2 uppercase flex-shrink-0">Event Log</h3>
             <div className="flex flex-col gap-0.5 text-[16px] font-mono text-gray-400 overflow-y-auto flex-1 pr-1">
               {cacheState.history.slice().reverse().map((entry, i) => (
@@ -107,6 +115,9 @@ function App() {
           </div>
         </div>
       </div>
+
+      {/* Bottom Bar */}
+      <BottomBar numIndexes={numIndexes} setNumIndexes={setNumIndexes} />
     </div>
   );
 }

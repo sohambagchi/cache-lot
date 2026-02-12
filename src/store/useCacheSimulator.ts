@@ -10,16 +10,22 @@ export const useCacheSimulator = () => {
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const reset = useCallback(() => {
-        setCacheState(prevState => initializeCache(prevState.type));
+        setCacheState(prevState => initializeCache(prevState.type, prevState.sets.length));
         setLastResult(null);
         setQueue([]);
         setIsPlaying(false);
     }, []);
 
     const setType = useCallback((type: CacheType) => {
-        setCacheState(initializeCache(type));
+        setCacheState(prevState => initializeCache(type, prevState.sets.length));
         setLastResult(null);
         // Don't clear queue when switching types, allowing user to run same workload
+        setIsPlaying(false);
+    }, []);
+
+    const setNumIndexes = useCallback((count: number) => {
+        setCacheState(prevState => initializeCache(prevState.type, count));
+        setLastResult(null);
         setIsPlaying(false);
     }, []);
 
@@ -68,6 +74,8 @@ export const useCacheSimulator = () => {
         addToQueue,
         reset,
         setType,
-        setIsPlaying
+        setIsPlaying,
+        numIndexes: cacheState.sets.length,
+        setNumIndexes
     };
 };

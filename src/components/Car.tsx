@@ -4,11 +4,12 @@ import { useMemo } from 'react';
 
 interface CarProps {
     address: number;
+    tag: number;
     isHit?: boolean;
     isEvicting?: boolean;
 }
 
-export const Car = ({ address, isHit }: CarProps) => {
+export const Car = ({ address, tag, isHit }: CarProps) => {
     // Generate a consistent color based on address
     const carColor = useMemo(() => {
         const colors = [
@@ -36,15 +37,15 @@ export const Car = ({ address, isHit }: CarProps) => {
             }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             className={clsx(
-                "w-[90%] h-10 rounded-md shadow-sm flex items-center justify-between px-2 relative border border-black/10",
+                "w-[90%] h-14 rounded-md shadow-sm flex flex-col items-center justify-center px-1 relative border border-black/10 gap-0.5",
                 isHit ? "bg-green-400 ring-2 ring-green-300" : carColor
             )}
         >
             {/* Design: Simplified "Top Down" view */}
             {/* Hood/Roof */}
-            <div className="flex-1 flex justify-center z-10">
-                <span className="font-mono font-bold text-white text-xs drop-shadow-md">
-                    {address}
+            <div className="flex-1 flex flex-col items-center justify-center z-10 w-full">
+                <span className="font-mono text-[18px] text-white/80 bg-black/20 px-1 rounded leading-tight">
+                    TAG:{tag} ADDR:{address}
                 </span>
             </div>
 
